@@ -2,6 +2,10 @@
   xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml"
   ><url>
-      <loc>http://Shan2L.github.io/categories/</loc><changefreq>weekly</changefreq><priority>0.5</priority></url><url>
-      <loc>http://Shan2L.github.io/</loc><changefreq>weekly</changefreq><priority>0.5</priority></url><url>
-      <loc>http://Shan2L.github.io/tags/</loc><changefreq>weekly</changefreq><priority>0.5</priority></url></urlset>
+      <loc>http://Shan2L.github.io/categories/</loc><lastmod>2023-12-13T12:18:21&#43;08:00</lastmod><changefreq>weekly</changefreq><priority>1</priority></url><url>
+      <loc>http://Shan2L.github.io/tags/jit/</loc><lastmod>2023-12-13T12:18:21&#43;08:00</lastmod><changefreq>weekly</changefreq><priority>1</priority></url><url>
+      <loc>http://Shan2L.github.io/posts/</loc><lastmod>2023-12-13T12:18:21&#43;08:00</lastmod><changefreq>weekly</changefreq><priority>1</priority></url><url>
+      <loc>http://Shan2L.github.io/</loc><lastmod>2023-12-13T12:18:21&#43;08:00</lastmod><changefreq>weekly</changefreq><priority>1</priority></url><url>
+      <loc>http://Shan2L.github.io/tags/</loc><lastmod>2023-12-13T12:18:21&#43;08:00</lastmod><changefreq>weekly</changefreq><priority>1</priority></url><url>
+      <loc>http://Shan2L.github.io/categories/torch/</loc><lastmod>2023-12-13T12:18:21&#43;08:00</lastmod><changefreq>weekly</changefreq><priority>1</priority></url><url>
+      <loc>http://Shan2L.github.io/posts/test/</loc><lastmod>2023-12-13T12:18:21&#43;08:00</lastmod><changefreq>weekly</changefreq><priority>1</priority></url></urlset>

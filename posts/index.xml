@@ -1,12 +1,10 @@
 <rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
   <channel>
-    <title>Shan&#39;s Blog</title>
-    <link>http://Shan2L.github.io/</link>
-    <description>Shan&#39;s Blog</description>
+    <title>All Posts - Shan&#39;s Blog</title>
+    <link>http://Shan2L.github.io/posts/</link>
+    <description>All Posts | Shan&#39;s Blog</description>
     <generator>Hugo -- gohugo.io</generator><language>en</language><managingEditor>gostraight0304@gmail.com (Shan2L)</managingEditor>
-      <webMaster>gostraight0304@gmail.com (Shan2L)</webMaster><lastBuildDate>Wed, 13 Dec 2023 12:18:21 &#43;0800</lastBuildDate>
-      <atom:link href="http://Shan2L.github.io/index.xml" rel="self" type="application/rss+xml" />
-    <item>
+      <webMaster>gostraight0304@gmail.com (Shan2L)</webMaster><lastBuildDate>Wed, 13 Dec 2023 12:18:21 &#43;0800</lastBuildDate><atom:link href="http://Shan2L.github.io/posts/" rel="self" type="application/rss+xml" /><item>
   <title>TorchScript的转化</title>
   <link>http://Shan2L.github.io/posts/test/</link>
   <pubDate>Wed, 13 Dec 2023 12:18:21 &#43;0800</pubDate>
