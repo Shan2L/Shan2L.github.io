@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ubuntu22.04编译安装gcc12.2</title>
+
+    <link rel="stylesheet" href="/css/single-styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/styles/monokai.min.css">
+</head>
+<body>
+    <header>
+        <h1>Shan2L's Blog</h1>
+        <nav>
+            <a href="#">Home</a>
+            <a href="#">Portfolio</a>
+            <a href="#">Blog</a>
+            <a href="#">About</a>
+            <a href="#">Contact</a>
+        </nav>
+    </header>
+    <div class="container">
+
+
+        <div class="post-header">
+            <h1>ubuntu22.04编译安装gcc12.2</h1>
+            <div class="post-meta">
+                <span class="date">Published on: August 18, 2024</span> |
+                <span class="word-count">Word count: 103</span> |
+                <span class="reading-time">Reading time: 1 minutes</span> 
+                <br/>
+                
+
+                    <div style="display: flex; justify-content: center;">
+                    <div class="tags">category: </div>
+                        
+                            <div class="cat-item" onclick="location.href='/categories/system'">
+                                system
+                            </div>
+                        
+                            <div class="cat-item" onclick="location.href='/categories/tools'">
+                                tools
+                            </div>
+                        
+                            <div class="cat-item" onclick="location.href='/categories/ubuntu'">
+                                ubuntu
+                            </div>
+                        
+                    </div>
+                    </div>
+                
+                
+                    <div style="display: flex; justify-content: center;">
+                    <div class="tags">tags: </div>
+                        
+                            <div class="cat-item" onclick="location.href='/tags/system'">
+                                system
+                            </div>
+                        
+                            <div class="cat-item" onclick="location.href='/tags/tools'">
+                                tools
+                            </div>
+                        
+                            <div class="cat-item" onclick="location.href='/tags/ubuntu'">
+                                ubuntu
+                            </div>
+                        
+                    </div>
+                
+        </div>
+        
+            <div class="summary">
+                <p>本文记录了如何在ubuntu22.04操作系统上安装gcc12.2的详细步骤。</p>
+            </div>
+        
+
+        <div class="content-body">
+            <ol>
+<li>更新apt</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo apt-get update
+</span></span></code></pre></div><ol start="2">
+<li>安装wget</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>sudo apt-get install wget zlib2 make
+</span></span></code></pre></div><ol start="3">
+<li>下载相应版本的gcc安装包（把下面的地址换成相应版本的gcc即可）</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>wget https://ftp.gnu.org/gnu/gcc/gcc-12.2.0/gcc-12.2.0.tar.gz
+</span></span></code></pre></div><ol start="4">
+<li>解压安装包</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>tar -xzvf gcc-12.2.0.tar.gz
+</span></span></code></pre></div><ol start="5">
+<li>配置安装路径 sudo vim /etc/profile, 在最后添加</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>export PATH<span style="color:#f92672">=</span><span style="color:#e6db74">&#34;/usr/local/gcc-12.2/bin:</span>$PATH<span style="color:#e6db74">&#34;</span>
+</span></span></code></pre></div><ol start="6">
+<li>进入gcc源码目录</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cd gcc-12.2.0/
+</span></span></code></pre></div><ol start="7">
+<li>下载需要的配置</li>
+</ol>
+<pre tabindex="0"><code>./contrib/download_prerequisites
+</code></pre><ol start="8">
+<li>创建编译目录</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>cd  ..
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>mkdir temp_gcc9.2 <span style="color:#f92672">&amp;&amp;</span> cd temp_gcc9.2
+</span></span></code></pre></div><p>这里报错：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>configure: error: no acceptable C compiler found in $PATH
+</span></span></code></pre></div><p>原因是没有安装gcc g++， 解决方法：</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>apt-get install -y gcc g++
+</span></span></code></pre></div><p>再次执行后成功</p>
+<ol start="9">
+<li>编译安装</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>make <span style="color:#f92672">&amp;&amp;</span> make install 
+</span></span></code></pre></div><ol start="10">
+<li>链接</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>ln -s /usr/local/gcc-12.2/bin/gcc     /usr/bin/gcc
+</span></span><span style="display:flex;"><span>ln -s /usr/local/gcc-12.2/bin/g++     /usr/bin/g++
+</span></span></code></pre></div><ol start="11">
+<li>查看输出结果：</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>gcc -v
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span>root@fc4041008a22:/build# gcc -v
+</span></span><span style="display:flex;"><span>Using built-in specs.
+</span></span><span style="display:flex;"><span>COLLECT_GCC<span style="color:#f92672">=</span>gcc
+</span></span><span style="display:flex;"><span>COLLECT_LTO_WRAPPER<span style="color:#f92672">=</span>/usr/local/gcc-12.2/libexec/gcc/x86_64-pc-linux-gnu/12.2.0/lto-wrapper
+</span></span><span style="display:flex;"><span>Target: x86_64-pc-linux-gnu
+</span></span><span style="display:flex;"><span>Configured with: ../gcc-12.2.0/configure --prefix<span style="color:#f92672">=</span>/usr/local/gcc-12.2 --enable-threads<span style="color:#f92672">=</span>posix --disable-checking --disable-multilib
+</span></span><span style="display:flex;"><span>Thread model: posix
+</span></span><span style="display:flex;"><span>Supported LTO compression algorithms: zlib
+</span></span><span style="display:flex;"><span>gcc version 12.2.0 <span style="color:#f92672">(</span>GCC<span style="color:#f92672">)</span>
+</span></span></code></pre></div>
+        </div>
+
+    </div>
+
+
+</body>
+</html>
