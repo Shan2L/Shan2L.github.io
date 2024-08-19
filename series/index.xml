@@ -6,6 +6,14 @@
     <description>Recent content in Series on Shan2L&#39;s Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
+    <lastBuildDate>Sun, 18 Aug 2024 22:17:29 +0800</lastBuildDate>
     <atom:link href="https://example.org/series/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Build-Enssential</title>
+      <link>https://example.org/series/build-enssential/</link>
+      <pubDate>Sun, 18 Aug 2024 22:17:29 +0800</pubDate>
+      <guid>https://example.org/series/build-enssential/</guid>
+      <description></description>
+    </item>
   </channel>
 </rss>
