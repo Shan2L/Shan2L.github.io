@@ -1,0 +1,207 @@
+const e=`---
+title: Step-by-Step Debugging Process for ROCm-vLLM Distributed Page Faults
+date: 2026-3-15 18:14
+---
+
+![image.png](https://cdn2.flowus.cn/oss/37f903c6-f36f-41dd-9a6a-ba6f5e295793/image.png?time=1773555300&token=ae6e07554078758679e9562c1d98add729b8d922ff6e2b21cb18f86354c9f69c&role=free)
+
+This doc is only limited to Radeon series product, because it has limited tool to use to find the root cause of page fault issues.
+
+On ROCm platforms, **NUMA auto-balancing is recommended to be disabled**; it may cause performance degradation or unexpected runtime issues.
+
+This doc suppose your current version of ROCm, PyTorch, vLLM, NCCL and OS is compatible. We also suppose the versio of your GPU arch, firmware, bios, hardware and so on are compatible and can run normally.
+
+This doc only limited to distributed settings because single-card setting can be debugged by using rocgdb.
+
+## Introduction
+
+Debugging a page fault in a standard application is already challenging; in a hyperscale distributed environment, such failures become **catastrophic**.
+
+On modern mainstream HPC platforms (including NVIDIA CUDA and AMD ROCm), the software stack consists of multiple layers. Page-fault issues can originate from any layer, making precise root-cause localization extremely difficult.
+
+Worse still, some platforms provide limited debugging tooling; in distributed scenarios, conventional debuggers like GDB are often ineffective. This frequently forces engineers to spend weeks or longer isolating the root cause. This article summarizes a **systematic workflow** for debugging page-fault issues on the ROCm platform.
+
+![image.png](https://cdn2.flowus.cn/oss/b59b327c-5a06-4cfb-8eb3-0f427f0039db/image.png?time=1773555300&token=07fb4fc8abf4461f1c10d7b1c69ef81bb1581caebc54b260a20d23c6c575db27&role=free)
+
+## Workflow
+
+### Step1. Check pip package version
+
+Package versions play a critical role in application stability. Incompatibilities can trigger explicit interface errors *or silent page faults*.
+
+Carefully validate versions of core dependencies: \`torch\`, \`triton\`, \`transformers\`, \`aiter\`, \`flash-attn\`, etc. Many issues are resolved simply by aligning with the versions specified in the project’s \`requirements.txt\`.
+
+If all package versions match the requirements → proceed to **Step 2**.
+
+### Step2. Verify normal execution in eager mode
+
+For performance, vLLM introduces static-graph optimizations: \`CUDAGraph\` and \`TorchCompile\`. While effective, these optimizations are prone to triggering bugs.
+
+You can disable them by adding the flag \`--enforce-eager\` to your vLLM command line.
+
+- If the application runs normally with \`--enforce-eager\`: Deep-dive into the static-graph/compiler-related source code to locate the bug.
+
+- Otherwise → proceed to **Step 3**.
+
+### Step3. Test with the latest vLLM release or develop branch
+
+Many known page-fault issues have already been fixed in the latest vLLM release or \`develop\` branch. Test this first for a quick resolution.
+
+- If the page fault is **resolved**: Confirms no defects in the driver, compiler, or HIP libraries; the root cause is isolated to vLLM application code or Python libraries (a major debugging milestone).
+
+Proceed to Step4.
+
+### Step4. Locate the failure point with [ROCr Agent Debug Library](https://rocm.docs.amd.com/projects/rocr_debug_agent/en/latest/index.html)
+
+> The ROCR Debug Agent (ROCdebug-agent) is a library that can be loaded by the ROCm software runtime [(ROCR)](https://rocm.docs.amd.com/projects/ROCR-Runtime/en/latest/index.html) to provide the following functionality:
+
+  - Print the state of all AMD GPU wavefronts that cause a queue error (such as a memory violation, executing a \`s_trap 2\`, or executing an illegal instruction).
+
+  - Print the state of all AMD GPU wavefronts by sending a SIGQUIT signal to the process using \`kill -s SIGQUIT <pid>\` command or by pressing \`Ctrl-\\\`, while the program is executing.
+
+The ROCr Agent Debug Library is a very useful and easy-to-use tool that can print the state of AMD GPU wavefronts that cause a queue error.
+
+The ROCm Agent Debug Library is very easy to use, it works only by setting some environment variables. The more detailed usage should be referenced [here](https://rocm.docs.amd.com/projects/rocr_debug_agent/en/latest/how-to/user-guide.html#options).
+
+\`\`\`Plain Text
+export HSA_TOOLS_LIB=/opt/rocm/lib/librocm-debug-agent.so.2 ./my_program
+export ROCM_DEBUG_AGENT_OPTIONS="--all --output=rocm_debug"
+
+run your applications here
+...
+\`\`\`
+
+
+The most often case, this tool can help you locate the accurate kernel name launched during the running of your application, then you can find the corresponding operater where the kernel was launched.
+
+If the ROCr Agent Debug Library still can not help you find the kernel name, or the found kernel name is different, don't worry, just go on.
+
+We need to go to different paths here according to the result of Step3 and Step4.
+
+- If the latest release of vLLM has resolved your page fault issue in step3:
+
+  - If the ROCr Debug Agent Library helps you find the certain kernel name, go to Step5.
+
+  - If the ROCr Debug Agent Library can't help you, go to Step9.
+
+- If the latest release did not resolve the page fault issue, or the latest release is not available:
+
+  - If the ROCr Debug Agent Library helps you find the certain kernel name, go to Step6.
+
+  - If the ROCr Debug Agent Library can't help you, go to Step9.
+
+### Step5. Compare the pinpointed kernel/operator between current and latest versions 
+
+A fixed page fault in the latest vLLM confirms the problematic operator/kernel was modified upstream.
+
+- If the upstream change is small and compatible: Backport the fix to your target vLLM version and validate.
+
+- If the change is large/breaking → proceed to **Step 6**.
+
+### Step6 Replace the operator/kernel with alternatives
+
+Under such situations, we should find if there is any alternatives for our found operators or kernels.
+
+For example, pytorch uses hipblas_lt as the default backend for compute BLAS operation when running on a gfx1201 architechture. Once ROCr Agent Debug Library found it is hipblas_lt the kernel led to the page fault issue, we shold consider the replace the default backend with hipblas or rocblas library,  this can be implemented by setting the environment variable \`TORCH_BLAS_PREFER_HIPBLASLT=0\` or hacking the source code \`torch/aten/src/ATen/native/cuda/Blas.cpp\` of torch and re-compile it.
+
+Another example is, once we found the crime is triton unified attention operator, which is the default attention backend for ROCm platform in vLLM, we should consider replacing it with another backend such as aiter or flash-attn.
+
+If there is nothing to be used as an alternative, go to **Step 7**.
+
+### Step7. Search in community
+
+Search vLLM’s GitHub Issues/PRs using the faulty operator/kernel name. Closed issues, draft PRs, or discussion threads often contain workarounds or partial fixes. Test any viable solutions.
+
+If no useful information is found → proceed to **Step 9**.
+
+### Step8.  Fix the issue independently
+
+No community solution exists: you must resolve the kernel/operator defect on your own. Once fixed, contribute your patch upstream—this benefits the community and strengthens your professional profile.
+
+### Step9. Locate the kernel by HIP debugging environment variables
+
+If the ROCr Agent Debug Library can't help you find the kernel you want, you may try the debugging environment varables provided by HIP.
+
+Setting \`HIP_BLOCK_LAUNCHING=1\` or \`AMD_SERIALIZED_KERNEl=3\`can help to serialize the kernel enqueueing and launching.
+
+Setting \`AMD_LOG_LEVEL=4\` helps output the detailed runtime infomation of each kernel to the terminal. Setting together with \`AMD_LOG_LEVEL_FILE=filename\`will output the info into the filename you given.
+
+By this way, we block the asynchronized execution of the application, once the page fault happen, the last kernel should be considered as the primary suspect. If you find the target kernel, goto **Step 6**.
+
+However, under distributed, hyperscale, multi-process setting runtime environment, serialize the kernel launch may lead to deadlock and further lead to hang of the cluster. 
+
+If you encountered such problem, then go to **Step 11**.
+
+### Step10. Capture and Analyze logs 
+
+If both ROCr Agent Debug Library and HIP debugging env var can't help, we need to capture the log of different layer's components, including driver, HIP, HIP library and so on inorder to trace the related memory address and behaviors of memory management.
+
+\`\`\`Shell
+export AMD_LOG_LEVEL=4
+export HSAKMT_DEBUG_LEVEL=7
+export HSA_ENABLE_DEBUG=1
+export NCCL_DEBUG=TRACE
+export NCCL_DEBUG_SUBSYS=ALL
+
+\`\`\`
+
+
+Combined with the dmesg output, you can try to find the closest memory address in many output kernel infos, and further find the corresponding kernel name, this may be the most potential supect. You should try to replace it with the alternaltives as stated in Step7 for validation. If the page fault disappears, that proves the found kernel is indeed the root cause.
+
+If the kernel is hard to locate by analyzing the log file, go to Step11.
+
+### Step11. Rule out factors one by one (last-resort method)
+
+No specialized tools remain: use iterative elimination (labor-intensive but necessary).
+
+1. We can rule out some operators by testing different models. For example, we can run Qwen3 and Llama model to check the situation, if page fault occurs during the running of both model, we can rule out the MOE module because Llama does not have one.
+
+2. vLLM attention backend can be changed by appending parameter \`\`--attention-backend xxx\`.
+
+3. Auto-fused triton kernel can be disabled by setting \`TORCH_COMPILE_DISABLE=1\`, don't forget to delete the \`.triton\` directory in your home path.
+
+If the latest released vLLM has not resolved the page fault issue, that is to see you should consider the problem of driver:
+
+4. RDMA can be disabled by setting \`NCCL_IB_DISABLED=1\` and GPUDirect P2P can be disabled by setting \`NCCL_P2P_DISABLED=1\`.
+
+5. SDMA can be disabled by setting \`HSA_ENABLE_SDMA=0\`.
+
+6. The BLAS backend of torch can be changed by setting \`TORCH_BLAS_PREFER_HIPBLASLT=\` or hacking the source code of torch as stated in Step7.
+
+7. ....
+
+If you found the issue is related to driver, go to **Step 12.**
+
+If you found the issue is related to op/kernel , go to **Step 6.**
+
+### Step12. Find the patch for driver or file a support ticket
+
+If the issue is driver-related (KMD/UMD):
+
+8. Upgrade to the latest ROCm driver stack.
+
+9. Search for existing driver patches in the ROCm repositories.
+
+10. File a support ticket with the AMD/ROCm community.
+
+11. (Expert-only) Develop and apply an internal driver patch.
+
+
+
+## End
+
+This document provides a **systematic, step-by-step workflow** for debugging page faults in **distributed vLLM workloads on AMD Radeon GPUs with ROCm**.It is designed for scenarios where conventional debuggers (such as rocgdb) are not available, and follows a from-application-to-driver elimination methodology suitable for large-scale clusters.
+
+## Reference
+
+12. [System debugging — ROCm Documentation](https://rocm.docs.amd.com/en/latest/how-to/system-debugging.html)
+
+13. [Debugging with HIP — HIP 7.2.0 Documentation](https://rocm.docs.amd.com/projects/HIP/en/develop/how-to/debugging.html)
+
+14. [ROCR Debug Agent user guide — ROCR Debug Agent 2.1.0 Documentation](https://rocm.docs.amd.com/projects/rocr_debug_agent/en/latest/how-to/user-guide.html#options)
+
+15. [Using ROCm for HPC — ROCm Documentation](https://rocm.docs.amd.com/en/docs-7.2.0/how-to/rocm-for-hpc/#using-rocm-for-hpc)
+
+16. [Environment variables — ROCR 1.18.0 Documentation](https://rocm.docs.amd.com/projects/ROCR-Runtime/en/latest/api-reference/environment_variables.html)
+
+`;export{e as default};
