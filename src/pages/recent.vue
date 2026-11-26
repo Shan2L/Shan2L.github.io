@@ -55,8 +55,9 @@ const awards = [
         domestic GPU company, implementing key operators for large language models. I have also
         collaborated with researchers from North Carolina State University and Oregon State
         University on memory optimization for large vision models, and interned at Intel Shanghai,
-        where I worked on recommendation model optimization and the CI/CD system of an open-source
-        project.
+        where I worked on recommendation model optimization and the CI/CD system of the open-source
+        project
+        <a href="https://github.com/DeepRec-AI/DeepRec" target="_blank" rel="noopener">DeepRec</a>.
       </p>
     </section>
 
@@ -135,6 +136,19 @@ p {
   margin: 0 0 16px;
 }
 
+.hero a,
+.note a {
+  color: var(--heading);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 3px;
+}
+
+.hero a:hover,
+.note a:hover {
+  text-decoration-color: currentColor;
+}
+
 .block {
   margin-bottom: 64px;
 }
@@ -175,17 +189,6 @@ p {
   margin: 4px 0 0;
   font-size: 14px;
   color: var(--muted);
-}
-
-.note a {
-  color: var(--heading);
-  text-decoration: underline;
-  text-decoration-color: var(--border);
-  text-underline-offset: 3px;
-}
-
-.note a:hover {
-  text-decoration-color: currentColor;
 }
 
 @media (max-width: 560px) {
