@@ -89,7 +89,8 @@ const awards = [
         <li v-for="item in awards" :key="item.title">
           <span class="when">{{ item.year }}</span>
           <div class="what">
-            {{ item.title }} <span v-if="item.org" class="sub">&middot; {{ item.org }}</span>
+            <span class="trophy" aria-hidden="true">🏆</span> {{ item.title }}
+            <span v-if="item.org" class="sub">&middot; {{ item.org }}</span>
           </div>
         </li>
       </ul>
@@ -183,6 +184,10 @@ p {
 
 .sub {
   color: var(--muted);
+}
+
+.trophy {
+  margin-right: 2px;
 }
 
 .note {
