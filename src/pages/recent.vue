@@ -24,7 +24,8 @@ const experience = [
     period: '2022.01 – 2023.01',
     org: 'Intel, Shanghai',
     role: 'Intern, CESG',
-    note: 'Recommendation model optimization and the CI/CD system of the open-source project DeepRec.',
+    note: 'Recommendation model optimization and the CI/CD system of the open-source project',
+    link: { text: 'DeepRec', href: 'https://github.com/DeepRec-AI/DeepRec' },
   },
 ]
 
@@ -68,7 +69,14 @@ const awards = [
             <div class="what">
               {{ item.org }} <span class="sub">&middot; {{ item.role }}</span>
             </div>
-            <p class="note">{{ item.note }}</p>
+            <p class="note">
+              {{ item.note }}
+              <template v-if="item.link">
+                {{ ' ' }}<a :href="item.link.href" target="_blank" rel="noopener">{{
+                  item.link.text
+                }}</a>.
+              </template>
+            </p>
           </div>
         </li>
       </ul>
@@ -167,6 +175,17 @@ p {
   margin: 4px 0 0;
   font-size: 14px;
   color: var(--muted);
+}
+
+.note a {
+  color: var(--heading);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 3px;
+}
+
+.note a:hover {
+  text-decoration-color: currentColor;
 }
 
 @media (max-width: 560px) {

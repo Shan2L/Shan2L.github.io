@@ -40,7 +40,8 @@
       <p>
         I was also an intern at Intel in Shanghai during my postgraduate studies, in a team within
         CESG. We mainly worked with Alibaba to deliver continuous optimization for their
-        recommendation models, and maintained an open-source project named "DeepRec". I optimized one
+        recommendation models, and maintained an open-source project named
+        <a href="https://github.com/DeepRec-AI/DeepRec">DeepRec</a>. I optimized one
         of the models by fusing operators to reduce memory access latency, and used Intel's AVX-512
         instructions to improve throughput. I also integrated an auto-tuning matmul operator into
         DeepRec, and built its CI/CD system, covering auto-build, unit tests and performance
