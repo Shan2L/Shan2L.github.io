@@ -1,89 +1,161 @@
 <script setup>
-import { computed } from 'vue'
+import PostList from '@/components/PostList.vue'
 
-// 匹配 posts 目录下所有 .md 文件（包括子目录）
-const modules = import.meta.glob('../posts/**/*.md',
-    {
-        eager: true,
-    }
-)
+const experience = [
+  {
+    period: '2025.09 – Present',
+    org: 'AMD',
+    role: 'AI Infrastructure Engineer',
+    note: 'RCCL optimization and large-model deployment on Radeon GPUs.',
+  },
+  {
+    period: '2024.12 – 2025.12',
+    org: 'North Carolina State University',
+    role: 'Remote Research Intern',
+    note: 'Reducing peak intermediate memory in large vision model inference, with Oregon State University.',
+  },
+  {
+    period: '2023.07 – 2025.09',
+    org: 'Innosilicon',
+    role: 'Software Engineer',
+    note: 'Led iFormer, a high-performance operator library for large language models, built from scratch.',
+  },
+  {
+    period: '2022.01 – 2023.01',
+    org: 'Intel, Shanghai',
+    role: 'Intern, CESG',
+    note: 'Recommendation model optimization and the CI/CD system of the open-source project DeepRec.',
+  },
+]
 
-// 处理文件列表，生成标题和链接
-const articles = computed(() => {
-  const allArticles = Object.entries(modules).map(([filePath, module]) => {
-    // 提取文件名（不含扩展名）作为标题，或者从模块的 frontmatter 中获取
-    // const fileName = filePath.split('/').pop().replace(/\.md$/, '')
-    const fileName = filePath.split('/').pop()
-    // 生成路由链接（假设文章详情页路径为 /post/文件名）
-    // 如果模块有导出 title 属性（例如通过 frontmatter 解析），则使用它
-    const title = module.attributes?.title || fileName
-    const date = module.attributes?.date
-    return {fileName, title, date}
-  })
-
-  console.log(allArticles[0].date)
-    const sorted = allArticles
-    .filter(item => item.date)
-    .sort((a, b) => new DataTransfer(b.data) - new Date(a.data))
-
-    // console.log(sorted)
-    
-    return sorted.slice(0, 10)
-})
-
+const awards = [
+  { year: '2026', title: 'Executive Spotlight Award', org: 'AMD' },
+  { year: '2025', title: 'The only "A" performance rating among peers at the same level' },
+]
 </script>
 
 <template>
-<div id=body>
-<div id=intro>
-    
-    <p style="line-height: 1.5;">
-    <text style="font-size: 200%;">Hi</text>
-    <text>, I am Sylvan Liu, an AI software engineer currently working at AMD as an AI infrastructure engineer, 
-            focusing on optimizing communication libraries and deploying large models on GPUs. Previously, 
-            I led the development of a high-performance computing library at Innosilicon, a domestic GPU company, 
-            implementing key operators for large language models. I have also collaborated with academic researchers 
-            from North Carolina State University and Oregon State University on memory optimization for large vision models, 
-            and interned at Intel Shanghai, where I contributed to recommendation model optimizations and CI/CD systems for 
-            an open-source project.
-    </text>
-    </p>
-</div>
+  <div class="page">
+    <section class="hero">
+      <h1>Hi, I'm Sylvan.</h1>
+      <p class="lede">
+        AI infrastructure engineer at AMD, working on communication libraries and large-model
+        deployment on GPUs.
+      </p>
+      <p>
+        Previously I led the development of a high-performance computing library at Innosilicon, a
+        domestic GPU company, implementing key operators for large language models. I have also
+        collaborated with researchers from North Carolina State University and Oregon State
+        University on memory optimization for large vision models, and interned at Intel Shanghai,
+        where I worked on recommendation model optimization and the CI/CD system of an open-source
+        project.
+      </p>
+    </section>
 
-<div>
-    <h2> Recent Articles</h2>
-
-    <ul>
-        <li v-for="article in articles" :key="article.link" class="li_wrapper">
-            <router-link :to="{ path: '/postContent', query: {fileName: article.fileName}}">
-                {{article.title }}
-            </router-link>
+    <section class="block">
+      <h2 class="section-label">Experience</h2>
+      <ul class="rows">
+        <li v-for="item in experience" :key="item.org">
+          <span class="when">{{ item.period }}</span>
+          <div>
+            <div class="what">
+              {{ item.org }} <span class="sub">&middot; {{ item.role }}</span>
+            </div>
+            <p class="note">{{ item.note }}</p>
+          </div>
         </li>
-    </ul>
-</div>
+      </ul>
+    </section>
 
-</div>
+    <section class="block">
+      <h2 class="section-label">Awards</h2>
+      <ul class="rows">
+        <li v-for="item in awards" :key="item.title">
+          <span class="when">{{ item.year }}</span>
+          <div class="what">
+            {{ item.title }} <span v-if="item.org" class="sub">&middot; {{ item.org }}</span>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="section-label">Recent writing</h2>
+      <PostList :limit="10" />
+    </section>
+  </div>
 </template>
 
 <style scoped>
-
-#body{
-    margin-left: 10%;
-    margin-right: 10%;
-    margin-top: 5%;
-    margin-bottom: 5%;
+.hero {
+  margin-bottom: 72px;
 }
 
-#intro{
-
-    text-align: justify;
+h1 {
+  margin: 0 0 24px;
+  font-family: var(--serif);
+  font-size: clamp(36px, 7vw, 52px);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--heading);
 }
 
-
-.li_wrapper{
-    margin-top: 2%;
-    margin-bottom: 2%;
+.lede {
+  font-size: 19px;
+  color: var(--heading);
 }
 
+p {
+  margin: 0 0 16px;
+}
+
+.block {
+  margin-bottom: 64px;
+}
+
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--border);
+}
+
+.rows li {
+  display: grid;
+  grid-template-columns: 152px minmax(0, 1fr);
+  gap: 24px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.when {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.what {
+  color: var(--heading);
+}
+
+.sub {
+  color: var(--muted);
+}
+
+.note {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+@media (max-width: 560px) {
+  .rows li {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}
 </style>
-

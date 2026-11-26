@@ -1,48 +1,82 @@
 <script setup></script>
 
 <template>
-    <div id="intro">
-        <div>
-        Hi, I am Sylvan Liu, an AI software engineer. I currently worked at Advanced Micro Devices,Inc (AMD)
-        as an AI infrastructrue engineer. My responsibities include but are not limited to: optimize Rocm Communication
-        Collective Library(RCCL), deploy Large Models on Radeon-series GPU.
-        </div>
+  <div class="page">
+    <h1>About</h1>
 
-        <br/><br/>
+    <section>
+      <h2 class="section-label">Now &middot; AMD</h2>
+      <p>
+        Hi, I am Sylvan Liu, an AI software engineer. I currently work at Advanced Micro Devices,
+        Inc. (AMD) as an AI infrastructure engineer. My responsibilities include, but are not limited
+        to: optimizing the ROCm Communication Collectives Library (RCCL) and deploying large models on
+        Radeon-series GPUs.
+      </p>
+    </section>
 
-        <div>
-        Before AMD, I have worked at Innosilicon, which is a domestic GPU-design company, I lead, design the mainly take
-        part in the development of high-performance computing library named "iFormer", which is used to run LLM-specific operators
-        like fused_add_rms_norm, paged attention, flash attention and so on. I design and build this library from scratch and
-        use 1 year to complete implementation of the key operators.
-        </div>
+    <section>
+      <h2 class="section-label">Before &middot; Innosilicon</h2>
+      <p>
+        Before AMD, I worked at Innosilicon, a domestic GPU-design company, where I led and designed
+        the development of a high-performance computing library named "iFormer", which runs
+        LLM-specific operators like fused_add_rms_norm, paged attention, flash attention and so on. I
+        designed and built this library from scratch and completed the key operators within one year.
+      </p>
+    </section>
 
-        <br/><br/>
+    <section>
+      <h2 class="section-label">Research &middot; NCSU &amp; Oregon State</h2>
+      <p>
+        In my spare time, I worked as a remote intern at North Carolina State University, supervised
+        by <a href="https://dongkuanx27.github.io/">Dongkuan Xu</a>. Together with
+        <a href="https://wdong5.github.io/">Wenqian Dong</a>, an assistant professor at Oregon State
+        University, and her PhD student, we focused on reducing the intermediate memory peak during
+        the inference of large vision models.
+      </p>
+    </section>
 
-        <div>
-        During the spare time of my work, I worked as an remote intern at North Carolina State University. I was supervised by 
-        <a href="https://dongkuanx27.github.io/"> Dongkuan Xu</a>, we worked with an AP from Oregon State University <a href="https://wdong5.github.io/">Wenqian Dong</a>
-        and her Phd student to focus on reduce the intermediate momery bottleneck peak during the inference of Large Vision Model.
-        </div>
-
-        <br/><br/>
-
-        <div>
-        I have also been an intern of Intel, Inc at Shanghai when I was a post gradate student. I work at a team in CESG.
-        We mainly worked with Alibaba to deliver continous optimization for their recommendation models, and we also have a open-source
-        project name "DeepRec". I optimized one of the model by fusing them to reduce the memory access latency, we also use
-        Intel's AVX512 instruction to improve the throughput. Besides, I have integrate a auto-tunning matmul operator to DeepRec.
-        During my spare time, I build the CI/CD system for DeepRec, which contrains auto-build, unit-test, performance benchmark et.al.
-        </div>
-    </div>
+    <section>
+      <h2 class="section-label">Internship &middot; Intel Shanghai</h2>
+      <p>
+        I was also an intern at Intel in Shanghai during my postgraduate studies, in a team within
+        CESG. We mainly worked with Alibaba to deliver continuous optimization for their
+        recommendation models, and maintained an open-source project named "DeepRec". I optimized one
+        of the models by fusing operators to reduce memory access latency, and used Intel's AVX-512
+        instructions to improve throughput. I also integrated an auto-tuning matmul operator into
+        DeepRec, and built its CI/CD system, covering auto-build, unit tests and performance
+        benchmarks.
+      </p>
+    </section>
+  </div>
 </template>
 
 <style scoped>
-#intro{
-    margin-left: 10%;
-    margin-right: 10%;
-    margin-top: 5%;
-    margin-bottom: 5%;
-    text-align: justify;
+h1 {
+  margin: 0 0 48px;
+  font-family: var(--serif);
+  font-size: 36px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--heading);
+}
+
+section {
+  margin-bottom: 40px;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--heading);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 200ms ease;
+}
+
+a:hover {
+  text-decoration-color: currentColor;
 }
 </style>

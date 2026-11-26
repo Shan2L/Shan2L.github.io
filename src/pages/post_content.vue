@@ -3,10 +3,13 @@ import { ref, watch, onMounted, nextTick, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { marked, Renderer, Slugger } from 'marked'
 import hljs from 'highlight.js'
+import { posts, formatDate } from '@/posts.js'
 
 // 接收父组件传入的 fileName
 const props = defineProps(['fileName'])
 const route = useRoute()
+const meta = computed(() => posts.find((p) => p.fileName === props.fileName))
+const wide = window.matchMedia('(min-width: 1180px)').matches
 
 // 响应式数据
 const loading = ref(true)
@@ -338,11 +341,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="loading" class="loading">loading...</div>
-  <div v-else class="markdown-container">
-    <!-- 目录区域 -->
-    <div v-if="filteredToc.length" class="toc-container">
-      <div class="toc-title">Content</div>
+  <div v-if="loading" class="page loading">Loading…</div>
+  <div v-else class="post-layout">
+    <details v-if="filteredToc.length" class="toc-container" :open="wide">
+      <summary class="section-label">Contents</summary>
       <ul class="toc-list">
         <li 
           v-for="item in filteredToc" 
@@ -357,310 +359,286 @@ onMounted(() => {
           </a>
         </li>
       </ul>
-    </div>
-    
-    <!-- 内容区域 -->
-    <div class="markdown-content">
-      <div v-highlight v-html="content" class="markdown-body"></div>
-      <hr/>
-      <div id="pagefoot">Welcome to sylvan's blog site!</div>
-    </div>
+    </details>
 
+    <article class="markdown-content">
+      <header class="post-header">
+        <time v-if="meta">{{ formatDate(meta.date) }}</time>
+        <h1>{{ meta?.title || title }}</h1>
+      </header>
+      <div v-highlight v-html="content" class="markdown-body"></div>
+      <router-link to="/item_list" class="back">&larr; All writing</router-link>
+    </article>
   </div>
 </template>
 
 <style scoped>
-/* 全局基础样式 - 楷体 + 加粗 */
-
-
 .loading {
-  padding: 20px;
-  text-align: center;
-  color: #666;
+  color: var(--muted);
   font-size: 14px;
-  font-weight: 600 !important;
-  width: 95%;
-  margin: 0 auto;
 }
 
-/* 整体容器：百分比布局 */
-.markdown-container {
-  width: 95%;
-  max-width: 98%;
-  margin: 0 auto 0 1%;
-  padding: 24px 0; 
-  display: flex;
-  justify-content: flex-start;
-  gap: 2%;
-  overflow: visible;
+.post-layout {
+  display: grid;
+  grid-template-columns: minmax(0, var(--measure));
+  justify-content: center;
+  padding: 0 24px;
 }
 
-/* 目录容器 */
+.markdown-content {
+  min-width: 0;
+}
+
 .toc-container {
-  width: 20%;
-  min-width: 180px;
-  max-width: 220px;
-  position: sticky;
-  top: 24px;
-  align-self: flex-start;
-  height: fit-content;
-  padding: 16px;
-  border-radius: 8px;
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  flex-shrink: 0;
+  margin-bottom: 40px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
-.toc-title {
-  font-size: 16px;
-  font-weight: 600 !important;
-  color: #212529;
-  margin-bottom: 12px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #e9ecef;
+.toc-container summary {
+  margin: 0;
+  cursor: pointer;
+}
+
+.toc-container[open] summary {
+  margin-bottom: 8px;
 }
 
 .toc-list {
   list-style: none;
-  padding: 0;
   margin: 0;
+  padding: 0;
 }
 
 .toc-item {
-  margin: 8px 0;
+  margin: 6px 0;
+  font-size: 13px;
+  line-height: 1.45;
 }
 
-.toc-level-2 { padding-left: 0; }
 .toc-level-3 { padding-left: 12px; }
 .toc-level-4 { padding-left: 24px; }
 
 .toc-link {
-  color: #0d6efd;
+  color: var(--muted);
   text-decoration: none;
-  font-size: 14px;
-  line-height: 1.5;
-  font-weight: 500 !important;
+  transition: color 200ms ease;
 }
 
 .toc-link:hover {
-  text-decoration: underline;
-  color: #0a58ca;
-  font-weight: 600 !important;
+  color: var(--heading);
 }
 
-/* 锚点激活样式 */
+@media (min-width: 1180px) {
+  .post-layout {
+    grid-template-columns: 200px minmax(0, var(--measure)) 200px;
+    column-gap: 56px;
+  }
+  .markdown-content {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .toc-container {
+    grid-column: 3;
+    grid-row: 1;
+    position: sticky;
+    top: 48px;
+    align-self: start;
+    max-height: calc(100vh - 96px);
+    overflow-y: auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .toc-container summary {
+    list-style: none;
+    pointer-events: none;
+  }
+  .toc-container summary::-webkit-details-marker {
+    display: none;
+  }
+}
+
 :deep(.toc-active) {
   animation: tocHighlight 2s ease;
-  background-color: #f0f8ff; /* 增加背景高亮，更易识别 */
-  padding: 2px 8px;
-  border-radius: 4px;
 }
 
 @keyframes tocHighlight {
-  0% { background-color: #e7f5ff; }
+  0% { background-color: #e1f3fe; }
   100% { background-color: transparent; }
 }
 
-/* 内容区域 - 修复滚动样式 */
-.markdown-content {
-  width: 78%;
-  line-height: 1.8;
-  font-size: 15px;
-  color: #333;
-  background-color: #fff;
-  padding: 0 1% 0 0;
+.post-header {
+  margin-bottom: 40px;
+}
+
+.post-header time {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.post-header h1 {
+  margin: 8px 0 0;
+  font-family: var(--serif);
+  font-size: clamp(30px, 5vw, 40px);
+  font-weight: 500;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--heading);
+}
+
+.markdown-body {
   overflow-wrap: break-word;
-  word-wrap: break-word;
-  /* overflow-x: hidden; */
-  /* overflow-y: auto; */
-  max-height: calc(100vh - 48px);
-  /* scrollbar-width: thin; */
 }
 
-/* 代码块样式 */
-.markdown-content :deep(.markdown-code-block) {
-  position: relative;
-  padding: 0;
-  border-radius: 8px;
-  background: #f8f9fa;
-  border: 1px solid #e9ecef;
-  overflow-x: auto;
-  margin: 20px 0;
-  font-size: 14px;
-  white-space: pre;
-  word-wrap: normal;
-  width: 100%;
+.markdown-body :deep(p) {
+  margin: 0 0 20px;
 }
 
-/* 代码块内文字 */
-.markdown-content :deep(.markdown-code-block code),
-.markdown-content :deep(code),
-.markdown-content :deep(.code-lang) {
-  font-family: 'Consolas', 'Monaco', 'Courier New', monospace !important;
-  font-weight: 400 !important;
+.markdown-body :deep(h2),
+.markdown-body :deep(h3),
+.markdown-body :deep(h4) {
+  color: var(--heading);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
 }
 
-/* 表格样式 */
-.markdown-content :deep(table) {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 20px 0;
-  font-size: 14px;
-  display: block;
-  overflow-x: auto;
+.markdown-body :deep(h2) {
+  margin: 56px 0 16px;
+  font-size: 24px;
 }
 
-.markdown-content :deep(th) {
-  padding: 12px 16px;
-  border: 1px solid #e9ecef;
-  text-align: left;
-  background-color: #f8f9fa;
-  font-weight: 600 !important;
-  color: #212529;
+.markdown-body :deep(h3) {
+  margin: 40px 0 12px;
+  font-size: 19px;
 }
 
-.markdown-content :deep(td) {
-  padding: 12px 16px;
-  border: 1px solid #e9ecef;
-  text-align: left;
-  font-weight: 500 !important;
-}
-
-.markdown-content :deep(tr:nth-child(even)) {
-  background-color: #fafbfc;
-}
-
-/* 代码块语言标签 */
-.markdown-content :deep(.code-lang) {
-  position: absolute;
-  top: 0;
-  right: 0;
-  padding: 4px 12px;
-  font-size: 12px;
-  color: #666;
-  background-color: #e9ecef;
-  border-bottom-left-radius: 6px;
-}
-
-.markdown-content :deep(.markdown-code-block code) {
-  display: block;
-  padding: 20px 16px 16px;
-  background: transparent;
-  color: #212529;
-  line-height: 1.6;
-  width: 100%;
-}
-
-/* 行内代码 */
-.markdown-content :deep(code) {
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: #f8f9fa;
-  color: #d73a4a;
-  font-size: 14px;
-}
-
-/* 引用块 */
-.markdown-content :deep(blockquote) {
-  margin: 20px 0;
-  padding: 12px 16px;
-  border-left: 3px solid #dee2e6;
-  background-color: #f8f9fa;
-  color: #6c757d;
-  font-size: 14px;
-  font-weight: 500 !important;
-  width: 100%;
-}
-
-/* 标题样式 */
-.markdown-content :deep(h1) {
-  font-size: 28px;
-  color: #212529;
-  margin: 0 0 24px;
-  font-weight: 700 !important;
-  width: 100%;
-}
-.markdown-content :deep(h2) {
-  font-size: 22px;
-  color: #212529;
-  margin: 32px 0 16px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #e9ecef;
-  font-weight: 600 !important;
-}
-.markdown-content :deep(h3) {
-  font-size: 18px;
-  color: #212529;
-  margin: 24px 0 12px;
-  font-weight: 600 !important;
-}
-.markdown-content :deep(h4) {
+.markdown-body :deep(h4) {
+  margin: 32px 0 8px;
   font-size: 16px;
-  color: #212529;
-  margin: 20px 0 10px;
-  font-weight: 500 !important;
 }
 
-/* 列表缩进减少一半 */
-.markdown-content :deep(ul),
-.markdown-content :deep(ol) {
-  margin: 16px 0;
-  padding-left: 2.5%; /* 核心修改：缩进减少一半 */
-}
-.markdown-content :deep(li) {
-  margin: 8px 0;
-  font-weight: 500 !important;
-  overflow-wrap: break-word;
-}
-
-/* 段落、链接 */
-.markdown-content :deep(p) {
-  margin: 16px 0;
-  font-weight: 500 !important;
-  overflow-wrap: break-word;
-}
-.markdown-content :deep(a) {
-  color: #0d6efd;
-  text-decoration: none;
-  font-weight: 500 !important;
-}
-.markdown-content :deep(a:hover) {
+.markdown-body :deep(a) {
+  color: var(--accent);
   text-decoration: underline;
-  color: #0a58ca;
-  font-weight: 600 !important;
+  text-decoration-color: rgba(31, 108, 159, 0.3);
+  text-underline-offset: 3px;
 }
 
-#pagefoot {
-  text-align: center;
-  color:  #d3d3d3;
-  padding-bottom: 10%;
+.markdown-body :deep(a:hover) {
+  text-decoration-color: currentColor;
 }
 
-/* 响应式适配 */
-@media (max-width: 768px) {
-  .markdown-container {
-    flex-direction: column;
-    width: 98%;
-    margin: 0 1%;
-    padding: 24px 0;
-    gap: 3%;
-  }
-  .toc-container {
-    width: 100%;
-    max-width: 100%;
-    position: static;
-    margin-bottom: 16px;
-  }
-  .markdown-content {
-    width: 100%;
-    padding: 0 1%;
-    max-height: calc(100vh - 120px);
-  }
-  /* 移动端列表缩进：从8%改为4%（减少一半） */
-  .markdown-content :deep(ul),
-  .markdown-content :deep(ol) {
-    padding-left: 4%; /* 核心修改：移动端缩进也减少一半 */
-  }
+.markdown-body :deep(strong) {
+  color: var(--heading);
+  font-weight: 600;
+}
 
+.markdown-body :deep(img) {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 32px auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.markdown-body :deep(ul),
+.markdown-body :deep(ol) {
+  margin: 0 0 20px;
+  padding-left: 1.4em;
+}
+
+.markdown-body :deep(li) {
+  margin: 6px 0;
+}
+
+.markdown-body :deep(blockquote) {
+  margin: 24px 0;
+  padding: 2px 0 2px 20px;
+  border-left: 2px solid var(--border);
+  color: var(--muted);
+}
+
+.markdown-body :deep(hr) {
+  margin: 48px 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+.markdown-body :deep(code) {
+  font-family: var(--mono);
+  font-size: 0.875em;
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--heading);
+}
+
+.markdown-body :deep(.markdown-code-block) {
+  position: relative;
+  margin: 28px 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  overflow-x: auto;
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+
+.markdown-body :deep(.markdown-code-block code) {
+  display: block;
+  padding: 36px 20px 18px;
+  background: transparent;
+  border-radius: 0;
+  font-size: inherit;
+  white-space: pre;
+}
+
+.markdown-body :deep(.code-lang) {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.markdown-body :deep(table) {
+  display: block;
+  width: 100%;
+  margin: 28px 0;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.markdown-body :deep(th),
+.markdown-body :deep(td) {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.markdown-body :deep(th) {
+  color: var(--heading);
+  font-weight: 600;
+}
+
+.back {
+  display: inline-block;
+  margin-top: 56px;
+  font-size: 14px;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.back:hover {
+  color: var(--heading);
 }
 </style>
