@@ -37,6 +37,13 @@ const awards = [
 <template>
   <div class="page">
     <section class="hero">
+      <img
+        class="avatar"
+        src="https://avatars.githubusercontent.com/u/38881602?s=240&v=4"
+        alt="Sylvan Liu"
+        width="88"
+        height="88"
+      />
       <h1>Hi, I'm Sylvan.</h1>
       <p class="lede">
         AI infrastructure engineer at AMD, working on communication libraries and large-model
@@ -89,6 +96,16 @@ const awards = [
 <style scoped>
 .hero {
   margin-bottom: 72px;
+}
+
+.avatar {
+  display: block;
+  width: 88px;
+  height: 88px;
+  margin-bottom: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  object-fit: cover;
 }
 
 h1 {
